@@ -40,11 +40,19 @@ def merge_all():
     t.close()
 
 root = cTk.CTk()
-root.title("Custom Tkinter Works!")
+root.title("PDF conversion utilities")
 
 root.geometry("500x500")
 
-tisa_font = cTk.CTkFont(family="Quicksand", size=15, weight="normal")
+font_manager = cTk.FontManager()
+font_manager.init_font_manager()
+font_manager.load_font("./Quicksand.zip")
+
+print("S")
+print(cTk.ThemeManager.theme["CTkFont"])
+
+
+font = cTk.CTkFont(family="Quicksand", size=15, weight="normal")
 pdf_file_type = [("PDF Document", "*.pdf")]
 image_file_types = [("JFIF Image", "*.jfif"), ("PNG Image", "*.png"), ("JPEG Image", "*.jpg"), ("TIFF Image", ".tiff .tif")]
 all_supported_file_types = [("Supported Files", [x[1] for x in pdf_file_type + image_file_types])]
@@ -59,7 +67,7 @@ load_files = lambda: [file_list.insert(i, fname) for i, fname in enumerate(filed
 merge_pdfs = lambda: merge_Pdfs(file_list.get(0, 'end'), ask_pdf_save())
 convert_images = lambda: images_to_pdf(get_image_names(), ask_pdf_save())
 
-label_file_list = cTk.CTkLabel(root, textvariable="Loaded files: ", font=(tisa_font))
+label_file_list = cTk.CTkLabel(root, text="Loaded files: ", font=font)
 label_file_list1 = cTk.CTkLabel(root, text="Loaded files: ")
 label_file_list.pack()
 label_file_list1.pack()
