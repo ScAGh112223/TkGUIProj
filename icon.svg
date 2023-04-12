@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <g
+     id="layer1">
+    <path
+       style="fill:#ff7373;fill-opacity:1;stroke-width:0.264583"
+       d="M 42.850746,49.130598 H 148.8694 V 194.30597 H 42.481342 l -4.288821,-57.25494 c -1.669744,-10.71353 -2.564125,-21.42705 -6.054463,-32.14058 0,0 -1.653118,-7.327581 -16.623133,-27.705229 C 1.2374561,57.770288 -18.368326,55.78745 42.018482,48.941441 c 124.349668,-14.097433 0.832264,0.189157 0.832264,0.189157 z"
+       id="path4287" />
+    <path
+       style="fill:#ff7373;fill-opacity:1;stroke-width:0.264583"
+       d="M 41.742537,193.19776 C 147.39179,49.130598 98.261193,117.47015 98.261193,117.47015"
+       id="path5174" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke-width:0.264583"
+       d="M 42.850747,193.93656 C 106.75746,172.51119 154.41045,173.61941 148.13059,52.455217"
+       id="path5438" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.7556px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke-width:0.264583"
+       x="-42.695938"
+       y="171.21637"
+       id="text6188"
+       transform="rotate(-54.014001)"><tspan
+         id="tspan6186"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.7556px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+         x="-42.695938"
+         y="171.21637">PDF UTILS</tspan></text>
+  </g>
+</svg>
