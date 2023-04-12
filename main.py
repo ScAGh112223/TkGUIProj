@@ -43,38 +43,35 @@ root = cTk.CTk()
 root.title("PDF conversion utilities")
 
 root.geometry("500x500")
+root.iconbitmap("./icon.ico")
 
-font_manager = cTk.FontManager()
-font_manager.init_font_manager()
-font_manager.load_font("./Quicksand.zip")
+# Load custom font so that it can be used in theme
+font_manager = cTk.FontManager() # Make Font Manager
+font_manager.init_font_manager() # Initialize Manager
+font_manager.load_font("Quicksand-VariableFont_wght.ttf") # Load custom font
 
-print("S")
-print(cTk.ThemeManager.theme["CTkFont"])
+cTk.ThemeManager.theme["CTkFont"] = {'family': 'Quicksand', 'size': 15, 'weight': 'normal'} # Set font for all text by setting font in font theme to custom loaded font
+
+pdf_file_type = [("PDF Document", "*.pdf")] # File type for PDF file ( variable as it is used often )
+image_file_types = [("JFIF Image", "*.jfif"), ("PNG Image", "*.png"), ("JPEG Image", "*.jpg"), ("TIFF Image", ".tiff .tif")] # Image file types
+all_supported_file_types = [("Supported Files", [x[1] for x in pdf_file_type + image_file_types])] # PDF and image files combined
 
 
-font = cTk.CTkFont(family="Quicksand", size=15, weight="normal")
-pdf_file_type = [("PDF Document", "*.pdf")]
-image_file_types = [("JFIF Image", "*.jfif"), ("PNG Image", "*.png"), ("JPEG Image", "*.jpg"), ("TIFF Image", ".tiff .tif")]
-all_supported_file_types = [("Supported Files", [x[1] for x in pdf_file_type + image_file_types])]
+get_image_names = lambda: [x for x in file_list.get(0, 'end') if not x.endswith(".pdf")] # Gets all loaded image filenames
+get_pdf_names = lambda: [x for x in file_list.get(0, 'end') if x.endswith(".pdf")] # Gets all loaded PDF filenames
+ask_pdf_save = lambda: filedialog.asksaveasfilename(filetypes = pdf_file_type) # Show prompt for saving PDF
 
-print(all_supported_file_types)
+# Lambda function that loops over all files chosen by the user and adds each of them to the ListBox - Enumerate is needed as the insert() function requries and index
+load_files = lambda: [file_list.insert(i, fname) for i, fname in enumerate(filedialog.askopenfilenames(filetypes = all_supported_file_types))] # User can load any supported file type
+merge_pdfs = lambda: merge_Pdfs(file_list.get(0, 'end'), ask_pdf_save()) # Lambda function to merge loaded PDFs and save to specified location
+convert_images = lambda: images_to_pdf(get_image_names(), ask_pdf_save()) # Lambda function to convert loaded images to PDF and save to specified location
 
-get_image_names = lambda: [x for x in file_list.get(0, 'end') if not x.endswith(".pdf")]
-get_pdf_names = lambda: [x for x in file_list.get(0, 'end') if x.endswith(".pdf")]
-ask_pdf_save = lambda: filedialog.asksaveasfilename(filetypes = pdf_file_type)
+label_file_list = cTk.CTkLabel(root, text="Loaded files: ") # Label the ListBox
+label_file_list.pack() # Pack Label
 
-load_files = lambda: [file_list.insert(i, fname) for i, fname in enumerate(filedialog.askopenfilenames(filetypes = all_supported_file_types))]
-merge_pdfs = lambda: merge_Pdfs(file_list.get(0, 'end'), ask_pdf_save())
-convert_images = lambda: images_to_pdf(get_image_names(), ask_pdf_save())
-
-label_file_list = cTk.CTkLabel(root, text="Loaded files: ", font=font)
-label_file_list1 = cTk.CTkLabel(root, text="Loaded files: ")
-label_file_list.pack()
-label_file_list1.pack()
-
-file_list = Listbox(root, width = 100)
-file_list.pack()
-
+file_list = Listbox(root, width = 100) # Create a ListBox to show loaded files
+file_list.pack() # Pack ListBox
+ 
 button_load_files = cTk.CTkButton(root, text="Load File(s)", command = load_files)
 button_load_files.pack(pady=3)
 
