@@ -10,6 +10,19 @@ import img2pdf
 import customtkinter as cTk
 import pdf2image
 from PyPDF2 import PdfMerger
+from PIL import ImageTk
+from tkinter import Canvas
+
+class List_Item(cTk.CTkLabel):
+    def __init__(self, *args, text, **kwargs):
+
+        super().__init__(*args, text=text, **kwargs)
+
+        self.button_delete = cTk.CTkButton(self, width=1, height=1, text="X", command=self.remove_self)
+        self.button_delete.grid(row=0, column=0, padx=(450,0))
+    
+    def remove_self(self):
+        self.destroy()
 
 def merge_Pdfs(filenames: list, outputFilename: str = "", data = [], save: bool = True):
     merger = PdfMerger(outputFilename)
@@ -46,17 +59,46 @@ def merge_all(save:bool = True):
     
     t.close()
 
+def handler(val):
+    if val=="Merge PDFs": merge_pdfs() 
+    elif val=="Convert Images to PDF": convert_images()
+    elif val=="Merge All": merge_all()
+    segment_button_merges.set("EMPTY")
+
 def preview():
-    t = merge_all(save=False)
-    print(t)
-    canvas_preview.create_image(10, 10, image=pdf2image.pdf2image.convert_from_bytes(t, poppler_path="poppler-0.68.0_x86\\poppler-0.68.0\\bin")[1])
-    t.close()
+    merged = merge_all(save=False)
+
+    for canvas in tabs.tab("Preview").winfo_children():
+        canvas.pack_forget()
+
+    images = pdf2image.convert_from_bytes(merged, poppler_path="poppler-0.68.0_x86\\poppler-0.68.0\\bin")
+    canvases = [] 
+    for img in images:
+        w, h = img.size
+        cImg = cTk.CTkImage(light_image=img, dark_image=img, size=img.size)
+        canvas = cTk.CTkButton(tabs.tab("Preview"), image=cImg, text="")
+
+        # canvas.create_image(10, 10, image=cImg)
+        canvases.append(canvas)
+        canvas.pack()
+    
+    print(canvases)
+
+cTk.set_appearance_mode("dark")
 
 root = cTk.CTk()
 root.title("PDF conversion utilities")
 
 root.geometry("500x500")
 root.iconbitmap("./icon.ico")
+
+tabs = cTk.CTkTabview(root, command = preview)
+tabs.add("Merge and Convert")
+tabs.add("Preview")
+
+tab_main = tabs.tab("Merge and Convert")
+
+tabs.pack()
 
 # Load custom font so that it can be used in theme
 font_manager = cTk.FontManager() # Make Font Manager
@@ -69,39 +111,32 @@ pdf_file_type = [("PDF Document", "*.pdf")] # File type for PDF file ( variable 
 image_file_types = [("JFIF Image", "*.jfif"), ("PNG Image", "*.png"), ("JPEG Image", "*.jpg"), ("TIFF Image", ".tiff .tif")] # Image file types
 all_supported_file_types = [("Supported Files", [x[1] for x in pdf_file_type + image_file_types])] # PDF and image files combined
 
+get_filenames = lambda: [item.cget("text") for item in frame_file_list.winfo_children()]
 
-get_image_names = lambda: [x for x in file_list.get(0, 'end') if not x.endswith(".pdf")] # Gets all loaded image filenames
-get_pdf_names = lambda: [x for x in file_list.get(0, 'end') if x.endswith(".pdf")] # Gets all loaded PDF filenames
+get_image_names = lambda: [x for x in get_filenames() if not x.endswith(".pdf")] # Gets all loaded image filenames
+get_pdf_names = lambda: [x for x in get_filenames() if x.endswith(".pdf")] # Gets all loaded PDF filenames
 ask_pdf_save = lambda: filedialog.asksaveasfilename(filetypes = pdf_file_type) # Show prompt for saving PDF
 set_output = lambda msg, clr = "green": [label_output.configure(text = f"Saved to: {msg}", text_color=clr), msg][1]
 
 # Lambda function that loops over all files chosen by the user and adds each of them to the ListBox - Enumerate is needed as the insert() function requries and index
-load_files = lambda: [file_list.insert(i, fname) for i, fname in enumerate(filedialog.askopenfilenames(filetypes = all_supported_file_types))] # User can load any supported file type
-merge_pdfs = lambda: merge_Pdfs(file_list.get(0, 'end'), set_output(ask_pdf_save())) # Lambda function to merge loaded PDFs and save to specified location
+load_files = lambda: [List_Item(frame_file_list, text=fname).pack() for fname in filedialog.askopenfilenames(filetypes = all_supported_file_types)] # User can load any supported file type
+merge_pdfs = lambda: merge_Pdfs(get_pdf_names(), set_output(ask_pdf_save())) # Lambda function to merge loaded PDFs and save to specified location
 convert_images = lambda: images_to_pdf(get_image_names(), set_output(ask_pdf_save())) # Lambda function to convert loaded images to PDF and save to specified location
 
-label_file_list = cTk.CTkLabel(root, text="Loaded files: ") # Label the ListBox
-label_file_list.pack() # Pack Label
+label_file_list = cTk.CTkLabel(tab_main, text="Loaded files: ") # Label the ListBox
+label_file_list.pack(pady=(10, 0)) # Pack Label
 
-file_list = Listbox(root, width = 100) # Create a ListBox to show loaded files
-file_list.pack() # Pack ListBox
+frame_file_list = cTk.CTkFrame(tab_main, height=100) # Create a ListBox to show loaded files
+frame_file_list.pack() # Pack ListBox
  
-button_load_files = cTk.CTkButton(root, text="Load File(s)", command = load_files)
-button_load_files.pack(pady=3)
+button_load_files = cTk.CTkButton(tab_main, text="Load File(s)", command = load_files)
+button_load_files.pack(pady=(30, 20))
 
-button_merge = cTk.CTkButton(root, text="Merge Pdfs", command = merge_pdfs)
-button_merge.pack(pady=3)
+segment_button_merges = cTk.CTkSegmentedButton(tab_main, values=["Merge PDFs", "Convert Images to PDF", "Merge All"],
+                                               command= handler)
+segment_button_merges.pack()
 
-button_image_convert = cTk.CTkButton(root, text="Convert images to pdf", command = convert_images)
-button_image_convert.pack(pady=3)
-
-button_merge_all = cTk.CTkButton(root, text = "Merge All Images and PDFs", command = lambda: preview())
-button_merge_all.pack(pady=20)
-
-canvas_preview = cTk.CTkCanvas(root, width=50, height=100)
-canvas_preview.pack()
-
-label_output = cTk.CTkLabel(root, text="", text_color="green")
+label_output = cTk.CTkLabel(tab_main, text="", text_color="green")
 label_output.pack()
 
 

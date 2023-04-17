@@ -1,6 +1,6 @@
 import subprocess, sys, importlib
 
-dependencies = ["customtkinter", "PyPDF2", "img2pdf", "tkinter"]
+dependencies = ["customtkinter", "PyPDF2", "img2pdf", "tkinter", "pdf2image"]
 sub_packages = [("cTk", "filedialog"), ("tkinter", "Listbox"), ("PyPDF2", "PdfWriter"), ("PyPDF2", "PdfMerger")]
 custom_names = [("customtkinter", "cTk")]
 
