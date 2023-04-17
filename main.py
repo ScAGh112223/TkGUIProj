@@ -3,6 +3,7 @@
 
 # import img2pdf
 # from PyPDF2 import PdfReader, PdfWriter, PdfMerger
+from tkinter.constants import ANCHOR
 from customtkinter.windows.ctk_tk import CTk
 from __init__ import *
 import tempfile
@@ -12,6 +13,7 @@ import pdf2image
 from PyPDF2 import PdfMerger
 from PIL import ImageTk
 from tkinter import Canvas
+from PIL import Image
 
 ################################### MAKE THIS DRAGGABLE IF POSSIBLE
 class List_Item(cTk.CTkLabel):
@@ -24,6 +26,17 @@ class List_Item(cTk.CTkLabel):
     
     def remove_self(self):
         self.destroy()
+
+class Image_Preview(cTk.CTkScrollableFrame):
+    def __init__(self, *args, images, **kwargs):
+        super().__init__(*args, height=args[0].winfo_height(), **kwargs)
+
+        print(args[0])
+        for img in images:
+            self.create_image(img)
+    
+    def create_image(self, img):
+        cTk.CTkButton(self, image=cTk.CTkImage(img, size=(200,200*1.41)), text="",).grid()
 
 def merge_Pdfs(filenames: list, outputFilename: str = "", data = [], save: bool = True):
     merger = PdfMerger(outputFilename)
@@ -61,9 +74,12 @@ def merge_all(save:bool = True):
     t.close()
 
 def handler(val):
-    if val=="Merge PDFs": merge_pdfs() 
-    elif val=="Convert Images to PDF": convert_images()
-    elif val=="Merge All": merge_all()
+    try: 
+        if val=="Merge PDFs": merge_pdfs() 
+        elif val=="Convert Images to PDF": convert_images()
+        elif val=="Merge All": merge_all()
+    except Exception:
+        pass
     segment_button_merges.set("EMPTY")
 
 def preview():
@@ -74,14 +90,17 @@ def preview():
 
     images = pdf2image.convert_from_bytes(merged, poppler_path="poppler-0.68.0_x86\\poppler-0.68.0\\bin")
     canvases = [] 
+    prFrame = Image_Preview(tabs.tab("Preview"), images=[])
+    prFrame.pack(fill="both", expand=True)
     for img in images:
-        w, h = img.size
-        cImg = cTk.CTkImage(light_image=img, dark_image=img, size=img.size)
-        canvas = cTk.CTkButton(tabs.tab("Preview"), image=cImg, text="")
+        prFrame.create_image(img)
+        # w, h = img.size
+        # cImg = cTk.CTkImage(light_image=img, dark_image=img, size=img.size)
+        # canvas = cTk.CTkButton(tabs.tab("Preview"), image=cImg, text="")
 
-        # canvas.create_image(10, 10, image=cImg)
-        canvases.append(canvas)
-        canvas.pack()
+        # # canvas.create_image(10, 10, image=cImg)
+        # canvases.append(canvas)
+        # canvas.pack()
     
     print(canvases)
 
@@ -93,11 +112,12 @@ root.title("PDF conversion utilities")
 root.geometry("500x500")
 root.iconbitmap("./icon.ico")
 
-tabs = cTk.CTkTabview(root, command = preview)
+tabs = cTk.CTkTabview(root, height=500, width=450, command = preview)
 tabs.add("Merge and Convert")
 tabs.add("Preview")
 
 tab_main = tabs.tab("Merge and Convert")
+tab_main.configure(height=250)
 
 tabs.pack()
 
@@ -123,6 +143,8 @@ set_output = lambda msg, clr = "green": [label_output.configure(text = f"Saved t
 load_files = lambda: [List_Item(frame_file_list, text=fname).pack() for fname in filedialog.askopenfilenames(filetypes = all_supported_file_types)] # User can load any supported file type
 merge_pdfs = lambda: merge_Pdfs(get_pdf_names(), set_output(ask_pdf_save())) # Lambda function to merge loaded PDFs and save to specified location
 convert_images = lambda: images_to_pdf(get_image_names(), set_output(ask_pdf_save())) # Lambda function to convert loaded images to PDF and save to specified location
+
+Image_Preview(tabs.tab("Preview"), images=[Image.open("icon.jpg")]).pack(fill="both", expand=True)
 
 label_file_list = cTk.CTkLabel(tab_main, text="Loaded files: ") # Label the ListBox
 label_file_list.pack(pady=(10, 0)) # Pack Label
