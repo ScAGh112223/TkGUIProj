@@ -13,6 +13,7 @@ from PyPDF2 import PdfMerger
 from PIL import ImageTk
 from tkinter import Canvas
 
+################################### MAKE THIS DRAGGABLE IF POSSIBLE
 class List_Item(cTk.CTkLabel):
     def __init__(self, *args, text, **kwargs):
 
