@@ -21,8 +21,8 @@ class List_Item(cTk.CTkLabel):
 
         super().__init__(*args, text=text, **kwargs)
 
-        self.button_delete = cTk.CTkButton(self, width=1, height=1, text="X", command=self.remove_self)
-        self.button_delete.grid(row=0, column=0, sticky="e", padx=(len(text)*10+10, 0))
+        self.button_delete = cTk.CTkButton(self, width=1, height=1, text="X", command=self.remove_self, anchor="e")
+        self.button_delete.grid(row=0, padx=(425,0), sticky="e")
     
     def remove_self(self):
         self.destroy()
@@ -31,12 +31,11 @@ class Image_Preview(cTk.CTkScrollableFrame):
     def __init__(self, *args, images, **kwargs):
         super().__init__(*args, height=args[0].winfo_height(), **kwargs)
 
-        print(args[0])
         for img in images:
             self.create_image(img)
     
     def create_image(self, img):
-        cTk.CTkButton(self, image=cTk.CTkImage(img, size=(200,200*1.41)), text="",).grid()
+        cTk.CTkButton(self, image=cTk.CTkImage(img, size=(400,400*1.41)), text="",).grid()
 
 def merge_Pdfs(filenames: list, outputFilename: str = "", data = [], save: bool = True):
     merger = PdfMerger(outputFilename)
@@ -118,6 +117,8 @@ tabs.add("Preview")
 
 tab_main = tabs.tab("Merge and Convert")
 tab_main.configure(height=250)
+
+tabs.tab("Preview").configure(width=250)
 
 tabs.pack()
 
