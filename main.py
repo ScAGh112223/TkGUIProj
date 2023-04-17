@@ -19,7 +19,7 @@ class List_Item(cTk.CTkLabel):
         super().__init__(*args, text=text, **kwargs)
 
         self.button_delete = cTk.CTkButton(self, width=1, height=1, text="X", command=self.remove_self)
-        self.button_delete.grid(row=0, column=0, padx=(450,0))
+        self.button_delete.grid(row=0, column=0, sticky="e", padx=(len(text)*10+10, 0))
     
     def remove_self(self):
         self.destroy()
@@ -128,7 +128,7 @@ label_file_list.pack(pady=(10, 0)) # Pack Label
 
 frame_file_list = cTk.CTkFrame(tab_main, height=100) # Create a ListBox to show loaded files
 frame_file_list.pack() # Pack ListBox
- 
+
 button_load_files = cTk.CTkButton(tab_main, text="Load File(s)", command = load_files)
 button_load_files.pack(pady=(30, 20))
 
