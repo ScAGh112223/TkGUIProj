@@ -6,10 +6,11 @@ class List_Item(cTk.CTkLabel):
 
         super().__init__(*args, text=text, **kwargs) # Intialize custom tkitner Label with *args, text and **kwargs
 
-        self.button_delete = cTk.CTkButton(self, width=1, height=1, text="X", command=self.remove_self, anchor="e") # Create the delete button with a X, small width, height and function to delete button(anchor is to align to east or right)
+        self.button_delete = cTk.CTkButton(self, width=1, height=1, text="X", command=self.__remove_self, anchor="e") # Create the delete button with a X, small width, height and function to delete button(anchor is to align to east or right)
         self.button_delete.grid(row=0, padx=(425,0)) # Grid the button onto master widget and add padding to the left to align to right(works with east anchor)
     
-    def remove_self(self): # Deletes Label and Button
+    # Private function
+    def __remove_self(self): # Deletes Label and Button
         self.destroy() # Destroy self
 
 # Custom Widget - Scrollable frame with scaled images inside
@@ -20,7 +21,7 @@ class Image_Preview(cTk.CTkScrollableFrame):
 
         self.width = self.master.winfo_reqwidth()
 
-        self.master.bind("<Configure>", self.refresh) # Bind window resize to refresh
+        self.master.bind("<Configure>", self.__refresh) # Bind window resize to refresh
         self.images = [] # intialize list of images
     
     def create_image(self, img): # Function to create image
@@ -42,7 +43,7 @@ class Image_Preview(cTk.CTkScrollableFrame):
             Array with loaded PIL images'''
         return [imgButton.cget("image").cget("light_image") for imgButton in self.images] # Return the light_image attribute of the image attribute of every button in images array
     
-    def refresh(self, event): # Resizes images
+    def __refresh(self, event): # Resizes images - Private Function
         # If statements to make sure that the imae is not too too big
         img_w = event.width/1.5 if event.width*1.41 < event.height else event.width/1.5
         img_h = img_w*1.41 # Make height a little more than width to maintain A4 aspect ratio
@@ -102,8 +103,8 @@ def images_to_pdf(filenames: list, save: bool = True, outputFilename: str = ""):
     with open(outputFilename, "wb") as file:
         file.write(img2pdf.convert(filenames, layout_fun = layout_fun))
 
-# Merges all files - NOT FOR MODULE USE
-def merge_all(save:bool = True):
+# Merges all files - NOT FOR MODULE USE so private
+def __merge_all(save:bool = True):
     '''Merges all loaded files
     
     @params:
@@ -128,54 +129,58 @@ def merge_all(save:bool = True):
     merge_Pdfs(names, True, set_output(ask_pdf_save())) # Save to prompted location
     t.close() # delete temp file
 
-def handler(val):
-    try: 
-        if val=="Merge PDFs": merge_pdfs() 
-        elif val=="Convert Images to PDF": convert_images()
-        elif val=="Merge All": merge_all()
-    except Exception:
+# Handler for merge segmented button no docstring needed as private
+def __handler(val):
+    try: # Try Except in case merge fails(usually because there are no files loaded)
+        if val=="Merge PDFs": merge_pdfs() # Merge just the PDFs
+        elif val=="Convert Images to PDF": convert_images() # Convert Images
+        elif val=="Merge All": __merge_all() # Merge everything
+    except Exception: # If merge fails, just pass
         pass
-    segment_button_merges.set("EMPTY")
+    segment_button_merges.set("EMPTY") # Unselect option on segmented button
 
-def preview():
-    global cached_names
-    merged = merge_all(save=False)
-    if(tabs.get() != "Preview" or get_filenames() == cached_names): return
+# Previews loaded files no dosctring needed as private
+def __preview():
+    global cached_names # Acess global cache to improve load times
+    if(tabs.get() != "Preview" or get_filenames() == cached_names): return # Prevent re-loading on changing to main tab or if there have been no changes
 
-    for canvas in tabs.tab("Preview").winfo_children():
-        canvas.pack_forget()
+    merged = __merge_all(save=False) # get merged byte data
 
-    images = pdf2image.convert_from_bytes(merged, poppler_path="poppler-0.68.0_x86\\poppler-0.68.0\\bin")
-    prFrame = Image_Preview(tabs.tab("Preview"))
-    prFrame.pack(fill="both", expand=True)
-    for img in images:
-        prFrame.create_image(img)
+    for canvas in tabs.tab("Preview").winfo_children(): # Go through previous preview's children widgets
+        canvas.pack_forget() # Delete old preview
+
+    images = pdf2image.convert_from_bytes(merged, poppler_path="poppler-0.68.0_x86\\poppler-0.68.0\\bin") # Set up pdf2image with poppler_path and convert bytes to PIL images
+    prFrame = Image_Preview(tabs.tab("Preview")) # Create preview widget on preview tab
+    prFrame.pack(fill="both", expand=True) # Pack the preview so that it fills available space
+
+    for img in images: # Go through pages of PDF
+        prFrame.create_image(img) # Add page to preview
     
-    cached_names = get_filenames()
+    cached_names = get_filenames() # Cache current pages
 
-cTk.set_appearance_mode("dark")
+cTk.set_appearance_mode("dark") # Set colour scheme to dark
 
-root = cTk.CTk()
-root.title("PDF conversion utilities")
+root = cTk.CTk() # Create root window
+root.title("PDF conversion utilities") # Set title
 
-root.geometry("500x500")
-root.iconbitmap("./icon.ico")
+root.geometry("500x500") # Set default window size
+root.iconbitmap("./icon.ico") # Set icon
 
-height = root.winfo_height()
-width = root.winfo_width()
+height = root.winfo_height() # Get height
+width = root.winfo_width() # Get width
 
-cached_names = [""]
+cached_names = [""] # Initialize preview cache
 
-tabs = cTk.CTkTabview(root, height=height, width=width-50, command = preview)
-tabs.add("Merge and Convert")
-tabs.add("Preview")
+tabs = cTk.CTkTabview(root, height=height, width=width-50, command = __preview) # Create tabview and set height, width as well as handler
+tabs.add("Merge and Convert") # Add Merge and Convert Section
+tabs.add("Preview") # Add preview section
 
-tab_main = tabs.tab("Merge and Convert")
-tab_main.configure(width=width/2)
+tab_main = tabs.tab("Merge and Convert") # Get main tab as it is mentioned a lot
+tab_main.configure(width=width/2) # Set appropriate width
 
-tabs.tab("Preview").configure(width=width)
+tabs.tab("Preview").configure(width=width) # Set preview width
 
-tabs.pack(fill="both", expand=True)
+tabs.pack(fill="both", expand=True) # Pack tabs to fill available space
 
 # Load custom font so that it can be used in theme
 font_manager = cTk.FontManager() # Make Font Manager
@@ -188,35 +193,36 @@ pdf_file_type = [("PDF Document", "*.pdf")] # File type for PDF file ( variable 
 image_file_types = [("JFIF Image", "*.jfif"), ("PNG Image", "*.png"), ("JPEG Image", "*.jpg"), ("TIFF Image", ".tiff .tif")] # Image file types
 all_supported_file_types = [("Supported Files", [x[1] for x in pdf_file_type + image_file_types])] # PDF and image files combined
 
-get_filenames = lambda: [item.cget("text") for item in frame_file_list.winfo_children()]
+get_filenames = lambda: [item.cget("text") for item in frame_file_list.winfo_children()] # Gets filenames of all files loaded
 
 get_image_names = lambda: [x for x in get_filenames() if not x.endswith(".pdf")] # Gets all loaded image filenames
 get_pdf_names = lambda: [x for x in get_filenames() if x.endswith(".pdf")] # Gets all loaded PDF filenames
 ask_pdf_save = lambda: filedialog.asksaveasfilename(filetypes = pdf_file_type) # Show prompt for saving PDF
-set_output = lambda msg, clr = "green": [label_output.configure(text = f"Saved to: {msg}", text_color=clr), msg][1]
+set_output = lambda msg, clr = "green": [label_output.configure(text = f"Saved to: {msg}", text_color=clr), msg][1] # Sets output text and returns the input
 
-# Lambda function that loops over all files chosen by the user and adds each of them to the ListBox - Enumerate is needed as the insert() function requries and index
+# Lambda function that loops over all files chosen by the user and adds each of them as List Item
 load_files = lambda: [List_Item(frame_file_list, text=os.path.basename(fname)).pack() for fname in filedialog.askopenfilenames(filetypes = all_supported_file_types)] # User can load any supported file type
 merge_pdfs = lambda: merge_Pdfs(get_pdf_names(), True, set_output(ask_pdf_save())) # Lambda function to merge loaded PDFs and save to specified location
 convert_images = lambda: images_to_pdf(get_image_names(), True, set_output(ask_pdf_save())) # Lambda function to convert loaded images to PDF and save to specified location
 
 
-label_file_list = cTk.CTkLabel(tab_main, text="Loaded files: ") # Label the ListBox
+label_file_list = cTk.CTkLabel(tab_main, text="Loaded files: ") # Label the Files list
 label_file_list.pack(pady=(10, 0)) # Pack Label
 
-frame_file_list = cTk.CTkFrame(tab_main, height=100) # Create a ListBox to show loaded files
-frame_file_list.pack() # Pack ListBox
+frame_file_list = cTk.CTkFrame(tab_main, height=100) # Create a Frame to show loaded files
+frame_file_list.pack() # Pack Frame
 
-button_load_files = cTk.CTkButton(tab_main, text="Load File(s)", command = load_files)
-button_load_files.pack(pady=(30, 20))
+button_load_files = cTk.CTkButton(tab_main, text="Load File(s)", command = load_files) # Create button for user to load files
+button_load_files.pack(pady=(30, 20)) # Pack load file button
 
+# Create button for all merge options and set handler as command
 segment_button_merges = cTk.CTkSegmentedButton(tab_main, values=["Merge PDFs", "Convert Images to PDF", "Merge All"],
-                                               command= handler)
-segment_button_merges.pack()
+                                               command= __handler)
+segment_button_merges.pack() # Pack merge buttons
 
-label_output = cTk.CTkLabel(tab_main, text="", text_color="green")
-label_output.pack()
+label_output = cTk.CTkLabel(tab_main, text="", text_color="green") # Output text label
+label_output.pack() # Pack output
 
 
-if (__name__ == "__main__"):
-    root.mainloop()
+if (__name__ == "__main__"): # Only show UI if file is not being used as module
+    root.mainloop() # Run mainloop
