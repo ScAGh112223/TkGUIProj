@@ -124,7 +124,8 @@ def merge_all(save:bool = True):
         t.close() # Delete Temp file
         return merge_Pdfs(names, save=False) # Return merged PDF bytes
     
-    merge_Pdfs(names, set_output(ask_pdf_save())) # Save to prompted location
+    print(names)
+    merge_Pdfs(names, True, set_output(ask_pdf_save())) # Save to prompted location
     t.close() # delete temp file
 
 def handler(val):
@@ -196,8 +197,8 @@ set_output = lambda msg, clr = "green": [label_output.configure(text = f"Saved t
 
 # Lambda function that loops over all files chosen by the user and adds each of them to the ListBox - Enumerate is needed as the insert() function requries and index
 load_files = lambda: [List_Item(frame_file_list, text=os.path.basename(fname)).pack() for fname in filedialog.askopenfilenames(filetypes = all_supported_file_types)] # User can load any supported file type
-merge_pdfs = lambda: merge_Pdfs(get_pdf_names(), set_output(ask_pdf_save())) # Lambda function to merge loaded PDFs and save to specified location
-convert_images = lambda: images_to_pdf(get_image_names(), set_output(ask_pdf_save())) # Lambda function to convert loaded images to PDF and save to specified location
+merge_pdfs = lambda: merge_Pdfs(get_pdf_names(), True, set_output(ask_pdf_save())) # Lambda function to merge loaded PDFs and save to specified location
+convert_images = lambda: images_to_pdf(get_image_names(), True, set_output(ask_pdf_save())) # Lambda function to convert loaded images to PDF and save to specified location
 
 
 label_file_list = cTk.CTkLabel(tab_main, text="Loaded files: ") # Label the ListBox
