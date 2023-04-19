@@ -1,4 +1,15 @@
-from __init__ import * # Import everything needed into file(using this way as it also installs required packages as well)
+# from __init__ import * # Import everything needed into file(using this way as it also installs required packages as well)
+
+# Imports for building to exe
+import customtkinter as cTk
+from customtkinter import filedialog
+from PyPDF2 import PdfMerger
+import img2pdf
+import pdf2image 
+import tempfile 
+import pdf2image 
+import os
+import sys
 
 # Custom Widget - Label with a delete button on the right
 class List_Item(cTk.CTkLabel): 
@@ -113,7 +124,8 @@ def __merge_all(save:bool = True):
         PDF file int bytes if save is False'''
     names = get_pdf_names() # Get jsut PDF names in case there are no image names
 
-    t = tempfile.NamedTemporaryFile(mode="w+b", delete=False) # Create temp file to be able to use filenames for images
+    t = tempfile.NamedTemporaryFile(mode="w+b", delete=False) # Create temp file to be able to use filenames for imagess
+    set_output(t.name)
     try: 
         t.write(images_to_pdf(get_image_names(), save=False)) # Write images PDF to temp file
         names = names + [t.name] # Add images PDF to names if an error doesnt occur
@@ -144,17 +156,26 @@ def __preview():
     global cached_names # Acess global cache to improve load times
     if(tabs.get() != "Preview" or get_filenames() == cached_names): return # Prevent re-loading on changing to main tab or if there have been no changes
 
+    set_output("SD")
     merged = __merge_all(save=False) # get merged byte data
+    set_output("SDD")
 
     for canvas in tabs.tab("Preview").winfo_children(): # Go through previous preview's children widgets
+        set_output("SDDF")
         canvas.pack_forget() # Delete old preview
 
     images = pdf2image.convert_from_bytes(merged, poppler_path="poppler-0.68.0_x86\\poppler-0.68.0\\bin") # Set up pdf2image with poppler_path and convert bytes to PIL images
-    prFrame = Image_Preview(tabs.tab("Preview")) # Create preview widget on preview tab
+    set_output("SP")
+    try:
+        prFrame = Image_Preview(tabs.tab("Preview")) # Create preview widget on preview tab
+    except Exception as e:
+        set_output(e)
     prFrame.pack(fill="both", expand=True) # Pack the preview so that it fills available space
+    set_output("SR")
 
     for img in images: # Go through pages of PDF
         prFrame.create_image(img) # Add page to preview
+    set_output("SDO")
     
     cached_names = get_filenames() # Cache current pages
 
@@ -223,6 +244,7 @@ segment_button_merges.pack() # Pack merge buttons
 label_output = cTk.CTkLabel(tab_main, text="", text_color="green") # Output text label
 label_output.pack() # Pack output
 
+set_output(sys._MEIPASS)
 
 if (__name__ == "__main__"): # Only show UI if file is not being used as module
     root.mainloop() # Run mainloop
